@@ -13,6 +13,11 @@ export interface ParseResult {
 	invalidCount: number;
 }
 
+export interface HighlightRange {
+	from: number;
+	to: number;
+}
+
 /** Parse an explicit timestamp; reject JavaScript's automatic date rollover. */
 export function parseReminderDate(input: string): number | null {
 	const match = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?(?:(Z)|([+-])(\d{2}):(\d{2}))?$/.exec(input.trim());
@@ -121,25 +126,18 @@ function maskInline(line: string, lineNumber: number, lines: string[], state: Ma
 	return chars.join("");
 }
 
-function reminderText(path: string, line: string): string {
-	const text = line.replace(/@remind\([^)]*\)/g, "")
-		.replace(/^\s*(?:>\s*)*/, "")
-		.replace(/^(?:[-+*]|\d+[.)])\s+/, "")
-		.replace(/^\[[ xX]\]\s*/, "")
-		.replace(/^#{1,6}(?:\s+|$)/, "")
-		.replace(/[ \t]+/g, " ").trim();
-	return text || path.split("/").pop()?.replace(/\.md$/i, "") || "Reminder";
-}
-
-export function parseReminders(path: string, content: string): ParseResult {
-	const result: ParseResult = { reminders: [], invalidCount: 0 };
-	const occurrences = new Map<string, number>();
+function* visibleMarkdownLines(content: string): Generator<{ line: string; visible: string; lineNumber: number; offset: number }> {
 	const lines = content.split(/\r?\n/);
 	const state: MaskState = { comment: false, codeEnd: null };
 	let frontmatter = /^\uFEFF?---\s*$/.test(lines[0] ?? "");
 	let activeFence: { character: string; length: number } | null = null;
+	let nextOffset = 0;
 	for (let lineNumber = 0; lineNumber < lines.length; lineNumber++) {
 		const line = lines[lineNumber];
+		const offset = nextOffset;
+		nextOffset += line.length;
+		if (content[nextOffset] === "\r") nextOffset++;
+		if (content[nextOffset] === "\n") nextOffset++;
 		if (frontmatter) {
 			if (lineNumber > 0 && /^(?:---|\.\.\.)\s*$/.test(line)) frontmatter = false;
 			continue;
@@ -153,7 +151,57 @@ export function parseReminders(path: string, content: string): ParseResult {
 			activeFence = { character: boundary[1][0], length: boundary[1].length };
 			continue;
 		}
-		const visible = maskInline(line, lineNumber, lines, state);
+		yield { line, visible: maskInline(line, lineNumber, lines, state), lineNumber, offset };
+	}
+}
+
+/** Lexical ranges include markers as they are typed, without validating dates. */
+export function reminderMarkerRanges(text: string): HighlightRange[] {
+	const ranges: HighlightRange[] = [];
+	for (const line of text.matchAll(/[^\r\n]+/g)) {
+		const markers = [...line[0].matchAll(/@remind\b/g)].filter(marker => !escaped(line[0], marker.index!));
+		for (let index = 0; index < markers.length; index++) {
+			const from = markers[index].index!;
+			let to = from + markers[index][0].length;
+			if (line[0][to] === "(") {
+				const next = markers[index + 1]?.index ?? line[0].length;
+				const close = line[0].indexOf(")", to + 1);
+				to = close >= 0 && close < next ? close + 1 : next;
+			}
+			ranges.push({ from: line.index! + from, to: line.index! + to });
+		}
+	}
+	return ranges;
+}
+
+/** Document ranges share the scheduler's Markdown exclusions and UTF-16 offsets. */
+export function reminderHighlightRanges(content: string): HighlightRange[] {
+	const ranges: HighlightRange[] = [];
+	for (const { line, visible, offset } of visibleMarkdownLines(content)) {
+		for (const range of reminderMarkerRanges(visible)) {
+			let to = range.from;
+			// An unfinished marker must not extend its highlight into code or comments.
+			while (to < range.to && line[to] === visible[to]) to++;
+			ranges.push({ from: offset + range.from, to: offset + to });
+		}
+	}
+	return ranges;
+}
+
+function reminderText(path: string, line: string): string {
+	const text = line.replace(/@remind\([^)]*\)/g, "")
+		.replace(/^\s*(?:>\s*)*/, "")
+		.replace(/^(?:[-+*]|\d+[.)])\s+/, "")
+		.replace(/^\[[ xX]\]\s*/, "")
+		.replace(/^#{1,6}(?:\s+|$)/, "")
+		.replace(/[ \t]+/g, " ").trim();
+	return text || path.split("/").pop()?.replace(/\.md$/i, "") || "Reminder";
+}
+
+export function parseReminders(path: string, content: string): ParseResult {
+	const result: ParseResult = { reminders: [], invalidCount: 0 };
+	const occurrences = new Map<string, number>();
+	for (const { line, visible, lineNumber } of visibleMarkdownLines(content)) {
 		const completed = /^\s*(?:>\s*)*(?:(?:[-+*]|\d+[.)])\s+)?\[[xX]\](?:\s|$)/.test(visible);
 		const marker = /@remind\b/g;
 		for (let match = marker.exec(visible); match; match = marker.exec(visible)) {

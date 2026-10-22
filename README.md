@@ -25,6 +25,8 @@ The plugin is a local installation; it has not been published to the Obsidian co
 
 Type `@remind(YYYY-MM-DD HH:mm)` anywhere in a Markdown note. The reminder message comes from the rest of that line. It works with plain text, headings, and unchecked tasks. A line containing only a reminder uses the note name as its message.
 
+Reminder markers are highlighted in the editor (Live Preview and Source mode) and reading view using your theme’s highlight color. The highlight appears as soon as you type `@remind` and extends across the date while you type. Highlighting is visual; a valid date and time are still required to schedule a reminder.
+
 You can also select **Inline Reminders: Insert reminder** in Obsidian’s command palette (**⌘P**) to choose a date and time. The marker is inserted after your selection or at the cursor. Assign a shortcut in **Settings → Hotkeys** if desired.
 
 Supported timestamps:
@@ -77,7 +79,7 @@ npm test
 npm run build
 ```
 
-`npm run dev` watches and rebuilds `main.js`. The release bundles plugin code into a CommonJS file and leaves the Obsidian API external, as required by the host. There are no runtime package dependencies.
+`npm run dev` watches and rebuilds `main.js`. The release bundles plugin code into a CommonJS file and leaves Obsidian and its CodeMirror editor modules external, as required by the host. There are no separately installed runtime packages.
 
 Automated tests cover date validation and daylight saving, Markdown exclusions, reminder identity, saved-state validation, scheduling, notification permission and fallback behavior, and plugin lifecycle races. TypeScript checks use Obsidian 1.14.4 API definitions. Native macOS banner delivery requires a manual test in your installed Obsidian app.
 

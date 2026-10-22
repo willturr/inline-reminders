@@ -1,3 +1,4 @@
+.inline-reminders-highlight { background-color: var(--text-highlight-bg, rgba(255, 208, 0, 0.25)); color: var(--text-normal); border-radius: 3px; padding: 0 0.12em; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
 .inline-reminders-view { padding: var(--size-4-4); }
 .inline-reminders-header { display: flex; align-items: center; justify-content: space-between; gap: var(--size-4-2); }
 .inline-reminders-header h2 { margin: 0; font-size: var(--font-ui-large); }

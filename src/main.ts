@@ -5,6 +5,7 @@ import {
 import { formatLocalDate, parseReminderDate, parseReminders, ParseResult, Reminder } from "./parser";
 import { requestNotificationPermission, showDesktopNotification } from "./notifications";
 import { dueReminders, loadState, renameState, SavedState, visibleReminders } from "./state";
+import { highlightRenderedReminders, reminderHighlighter } from "./highlighting";
 
 const VIEW_TYPE = "inline-reminders-upcoming";
 
@@ -33,6 +34,8 @@ export default class InlineRemindersPlugin extends Plugin {
       return;
     }
     this.registerView(VIEW_TYPE, leaf => new RemindersView(leaf, this));
+    this.registerEditorExtension(reminderHighlighter);
+    this.registerMarkdownPostProcessor(highlightRenderedReminders);
     this.addRibbonIcon("bell", "Upcoming reminders", () => { void this.openView(); });
     this.addCommand({ id: "show-upcoming", name: "Show upcoming reminders", callback: () => { void this.openView(); } });
     this.addCommand({

@@ -1,6 +1,6 @@
 {
   "name": "obsidian-inline-reminders",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Inline reminders, desktop notifications, and an upcoming reminders view for Obsidian.",
   "license": "MIT",
@@ -11,6 +11,8 @@
     "test": "node --import tsx --test tests/*.test.ts"
   },
   "devDependencies": {
+    "@codemirror/state": "6.7.6",
+    "@codemirror/view": "6.43.13",
     "@types/node": "^26.6.5",
     "esbuild": "^0.28.2",
     "obsidian": "^1.14.4",

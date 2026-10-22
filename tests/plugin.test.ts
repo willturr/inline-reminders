@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import test from "node:test";
 import { runInNewContext } from "node:vm";
 import { buildSync } from "esbuild";
+import * as codemirrorView from "@codemirror/view";
 import { parseReminders, type ParseResult, type Reminder } from "../src/parser";
 import type { SavedState } from "../src/state";
 
@@ -12,7 +13,7 @@ const bundle = buildSync({
 	platform: "node",
 	format: "cjs",
 	write: false,
-	external: ["obsidian"],
+	external: ["obsidian", "@codemirror/*"],
 }).outputFiles[0].text;
 
 function deferred<T>() {
@@ -99,6 +100,8 @@ function harness(notes: Record<string, string>, saved: unknown = null, notificat
 		addRibbonIcon() {}
 		addCommand() {}
 		addSettingTab() {}
+		registerEditorExtension() {}
+		registerMarkdownPostProcessor() {}
 		registerDomEvent() {}
 		registerEvent(event: { off(): void }) { this.events.push(event); }
 		registerInterval(id: number) { this.intervalIds.push(id); }
@@ -115,6 +118,7 @@ function harness(notes: Record<string, string>, saved: unknown = null, notificat
 		module,
 		exports: module.exports,
 		require: (name: string) => {
+			if (name === "@codemirror/view") return codemirrorView;
 			assert.equal(name, "obsidian");
 			return { Plugin, ItemView: EmptyClass, MarkdownView, Modal: EmptyClass, Notice: EmptyClass, PluginSettingTab: EmptyClass, Setting: EmptyClass, TAbstractFile: AbstractFile, TFile: File };
 		},
