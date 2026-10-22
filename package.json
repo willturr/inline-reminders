@@ -1,0 +1,20 @@
+{
+  "name": "obsidian-inline-reminders",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Inline reminders, desktop notifications, and an upcoming reminders view for Obsidian.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc --noEmit && node esbuild.config.mjs production",
+    "check": "tsc --noEmit",
+    "test": "node --import tsx --test tests/*.test.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "esbuild": "^0.28.2",
+    "obsidian": "^1.14.4",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}

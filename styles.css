@@ -1,0 +1,15 @@
+.inline-reminders-view { padding: var(--size-4-4); }
+.inline-reminders-header { display: flex; align-items: center; justify-content: space-between; gap: var(--size-4-2); }
+.inline-reminders-header h2 { margin: 0; font-size: var(--font-ui-large); }
+.inline-reminders-help, .inline-reminders-count, .inline-reminders-empty { color: var(--text-muted); font-size: var(--font-ui-small); }
+.inline-reminders-view input[type="search"] { width: 100%; }
+.inline-reminders-list { display: flex; flex-direction: column; gap: var(--size-4-3); }
+.inline-reminders-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--size-4-2); padding: var(--size-4-3); border: 1px solid var(--background-modifier-border); border-radius: var(--radius-m); background: var(--background-primary); }
+.inline-reminders-title { grid-column: 1 / -1; justify-content: flex-start; text-align: left; white-space: normal; overflow-wrap: anywhere; height: auto; padding: 0; box-shadow: none; background: transparent; color: var(--text-normal); font-weight: var(--font-semibold); }
+.inline-reminders-title:hover { color: var(--text-accent); }
+.inline-reminders-path { grid-column: 1 / -1; color: var(--text-faint); overflow-wrap: anywhere; font-size: var(--font-ui-smaller); }
+.inline-reminders-time { align-self: center; color: var(--text-muted); font-size: var(--font-ui-small); }
+.inline-reminders-card.is-overdue { border-left: 3px solid var(--text-warning); }
+.inline-reminders-card.is-overdue .inline-reminders-time { color: var(--text-warning); }
+.inline-reminders-dismiss { font-size: var(--font-ui-smaller); }
+.inline-reminders-error { color: var(--text-error); }
