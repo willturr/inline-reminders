@@ -1,11 +1,12 @@
 import {
-  App, Editor, ItemView, MarkdownView, Modal, Notice, Plugin,
+  App, ItemView, MarkdownView, Notice, Plugin,
   PluginSettingTab, Setting, TAbstractFile, TFile, WorkspaceLeaf
 } from "obsidian";
-import { formatLocalDate, parseReminderDate, parseReminders, ParseResult, Reminder } from "./parser";
+import { parseReminders, ParseResult, Reminder } from "./parser";
 import { requestNotificationPermission, showDesktopNotification } from "./notifications";
 import { dueReminders, loadState, renameState, SavedState, visibleReminders } from "./state";
 import { highlightRenderedReminders, reminderHighlighter } from "./highlighting";
+import { ReminderDateSuggest } from "./autocomplete";
 
 const VIEW_TYPE = "inline-reminders-upcoming";
 
@@ -24,6 +25,7 @@ export default class InlineRemindersPlugin extends Plugin {
   private contentRevision = 0;
   private stopped = false;
   private lastSaveWarning = 0;
+  private dateSuggest?: ReminderDateSuggest;
 
   async onload(): Promise<void> {
     try {
@@ -36,11 +38,13 @@ export default class InlineRemindersPlugin extends Plugin {
     this.registerView(VIEW_TYPE, leaf => new RemindersView(leaf, this));
     this.registerEditorExtension(reminderHighlighter);
     this.registerMarkdownPostProcessor(highlightRenderedReminders);
+    this.dateSuggest = new ReminderDateSuggest(this.app, () => !this.stopped);
+    this.registerEditorSuggest(this.dateSuggest);
     this.addRibbonIcon("bell", "Upcoming reminders", () => { void this.openView(); });
     this.addCommand({ id: "show-upcoming", name: "Show upcoming reminders", callback: () => { void this.openView(); } });
     this.addCommand({
       id: "insert-reminder", name: "Insert reminder",
-      editorCallback: editor => new InsertReminderModal(this.app, editor).open()
+      editorCallback: (editor, info) => this.dateSuggest?.insertReminder(editor, info)
     });
     this.addCommand({ id: "test-notification", name: "Enable and test desktop notifications", callback: () => { void this.testNotification(); } });
     this.addCommand({ id: "rescan", name: "Rescan reminders", callback: () => { void this.rescan(); } });
@@ -70,6 +74,7 @@ export default class InlineRemindersPlugin extends Plugin {
 
   onunload(): void {
     this.stopped = true;
+    this.dateSuggest?.dispose();
     for (const timer of this.timers.values()) window.clearTimeout(timer);
     for (const notification of this.notifications) notification.close();
     this.notifications.clear();
@@ -342,41 +347,6 @@ export default class InlineRemindersPlugin extends Plugin {
 
 function isMarkdown(file: TAbstractFile): file is TFile {
   return file instanceof TFile && file.extension === "md";
-}
-
-class InsertReminderModal extends Modal {
-  constructor(app: App, private editor: Editor) { super(app); }
-
-  onOpen(): void {
-    this.titleEl.setText("Insert reminder");
-    const next = new Date(Date.now() + 60 * 60 * 1000);
-    next.setSeconds(0, 0);
-    let date = formatLocalDate(next);
-    const form = this.contentEl.createEl("form");
-    const setting = new Setting(form).setName("When").setDesc("Local time. Example: 2026-10-23 09:00");
-    let input!: HTMLInputElement;
-    setting.addText(component => {
-      input = component.inputEl;
-      input.type = "datetime-local";
-      input.required = true;
-      input.setAttribute("aria-label", "Reminder date and time");
-      component.setValue(date.replace(" ", "T")).onChange(value => { date = value; });
-    });
-    const error = form.createEl("p", { cls: "inline-reminders-error", attr: { role: "alert" } });
-    form.createEl("button", { text: "Insert reminder", cls: "mod-cta", attr: { type: "submit" } });
-    form.onsubmit = event => {
-      event.preventDefault();
-      if (parseReminderDate(date) === null) { error.setText("Choose a valid date and time."); return; }
-      const cursor = this.editor.getCursor("to");
-      const prefix = cursor.ch > 0 && !/\s/.test(this.editor.getLine(cursor.line).charAt(cursor.ch - 1)) ? " " : "";
-      this.editor.replaceRange(`${prefix}@remind(${date.replace("T", " ")})`, cursor);
-      this.close();
-      this.editor.focus();
-    };
-    input.focus();
-  }
-
-  onClose(): void { this.contentEl.empty(); }
 }
 
 class RemindersView extends ItemView {

@@ -1,6 +1,6 @@
 {
   "name": "obsidian-inline-reminders",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "description": "Inline reminders, desktop notifications, and an upcoming reminders view for Obsidian.",
   "license": "MIT",

@@ -14,3 +14,5 @@
 .inline-reminders-card.is-overdue .inline-reminders-time { color: var(--text-warning); }
 .inline-reminders-dismiss { font-size: var(--font-ui-smaller); }
 .inline-reminders-error { color: var(--text-error); }
+.inline-reminders-suggestion-title { font-weight: var(--font-medium); }
+.inline-reminders-suggestion-detail { color: var(--text-muted); font-size: var(--font-ui-smaller); }

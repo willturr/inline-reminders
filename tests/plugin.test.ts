@@ -102,6 +102,7 @@ function harness(notes: Record<string, string>, saved: unknown = null, notificat
 		addSettingTab() {}
 		registerEditorExtension() {}
 		registerMarkdownPostProcessor() {}
+		registerEditorSuggest() {}
 		registerDomEvent() {}
 		registerEvent(event: { off(): void }) { this.events.push(event); }
 		registerInterval(id: number) { this.intervalIds.push(id); }
@@ -112,6 +113,13 @@ function harness(notes: Record<string, string>, saved: unknown = null, notificat
 		}
 	}
 	class EmptyClass {}
+	class EditorSuggest {
+		context = null;
+		scope = { register() {} };
+		constructor(public app: unknown) {}
+		setInstructions() {}
+		close() { this.context = null; }
+	}
 	const errors: unknown[][] = [];
 	const module = { exports: {} as { default: new () => PluginInstance } };
 	runInNewContext(bundle, {
@@ -120,7 +128,7 @@ function harness(notes: Record<string, string>, saved: unknown = null, notificat
 		require: (name: string) => {
 			if (name === "@codemirror/view") return codemirrorView;
 			assert.equal(name, "obsidian");
-			return { Plugin, ItemView: EmptyClass, MarkdownView, Modal: EmptyClass, Notice: EmptyClass, PluginSettingTab: EmptyClass, Setting: EmptyClass, TAbstractFile: AbstractFile, TFile: File };
+			return { Plugin, EditorSuggest, ItemView: EmptyClass, MarkdownView, Modal: EmptyClass, Notice: EmptyClass, PluginSettingTab: EmptyClass, Setting: EmptyClass, TAbstractFile: AbstractFile, TFile: File };
 		},
 		window,
 		document: { hidden: false },

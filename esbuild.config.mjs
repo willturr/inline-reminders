@@ -12,7 +12,7 @@ const context = await esbuild.context({
   sourcemap: production ? false : "inline",
   minify: production,
   logLevel: "info",
-  banner: { js: "/* Inline Reminders v1.0.1 | MIT License */" }
+  banner: { js: "/* Inline Reminders v1.0.2 | MIT License */" }
 });
 if (production) {
   await context.rebuild();
