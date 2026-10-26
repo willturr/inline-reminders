@@ -2,9 +2,14 @@
 
 Set reminders in note text, receive macOS notifications, and view upcoming reminders.
 
+<img width="619" height="338" alt="Screenshot 2026-10-26 at 15 31 53" src="https://github.com/user-attachments/assets/a0ae33d7-fa9a-4a1e-960d-15a199245844" />
+
+<br>
+<br>
+
 ```markdown
 Call the dentist @remind(2026-11-02 09:00)
-- [ ] Send the proposal @remind(2026-11-03 14:30)
+- [ ] Send the proposal @remind(tomorrow)
 ```
 
 ## Install or update
