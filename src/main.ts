@@ -5,7 +5,10 @@ import {
 import { parseReminders, ParseResult, Reminder } from "./parser";
 import { requestNotificationPermission, showDesktopNotification } from "./notifications";
 import { dueReminders, loadState, renameState, SavedState, visibleReminders } from "./state";
-import { highlightRenderedReminders, reminderHighlighter } from "./highlighting";
+import {
+  highlightRenderedReminders, reminderHighlighter,
+  refreshEditorReminderHighlights, refreshRenderedReminderHighlights
+} from "./highlighting";
 import { ReminderDateSuggest } from "./autocomplete";
 
 const VIEW_TYPE = "inline-reminders-upcoming";
@@ -339,6 +342,10 @@ export default class InlineRemindersPlugin extends Plugin {
 
   private refreshViews(): void {
     if (this.stopped) return;
+    refreshEditorReminderHighlights();
+    for (const leaf of this.app.workspace.getLeavesOfType("markdown")) {
+      if (leaf.view instanceof MarkdownView) refreshRenderedReminderHighlights(leaf.view.contentEl);
+    }
     for (const leaf of this.app.workspace.getLeavesOfType(VIEW_TYPE)) {
       if (leaf.view instanceof RemindersView) leaf.view.render();
     }

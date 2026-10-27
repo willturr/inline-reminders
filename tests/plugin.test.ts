@@ -4,6 +4,7 @@ import test from "node:test";
 import { runInNewContext } from "node:vm";
 import { buildSync } from "esbuild";
 import * as codemirrorView from "@codemirror/view";
+import * as codemirrorState from "@codemirror/state";
 import { parseReminders, type ParseResult, type Reminder } from "../src/parser";
 import type { SavedState } from "../src/state";
 
@@ -40,6 +41,7 @@ class File extends AbstractFile {
 	get extension() { return this.path.split(".").pop() ?? ""; }
 }
 class MarkdownView {
+  contentEl = { querySelectorAll: () => [] };
 	constructor(public file: File, public editor: { getValue(): string }) {}
 	getMode() { return "source"; }
 }
@@ -127,6 +129,7 @@ function harness(notes: Record<string, string>, saved: unknown = null, notificat
 		exports: module.exports,
 		require: (name: string) => {
 			if (name === "@codemirror/view") return codemirrorView;
+			if (name === "@codemirror/state") return codemirrorState;
 			assert.equal(name, "obsidian");
 			return { Plugin, EditorSuggest, ItemView: EmptyClass, MarkdownView, Modal: EmptyClass, Notice: EmptyClass, PluginSettingTab: EmptyClass, Setting: EmptyClass, TAbstractFile: AbstractFile, TFile: File };
 		},

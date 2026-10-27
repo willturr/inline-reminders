@@ -1,4 +1,5 @@
 .inline-reminders-highlight { background-color: var(--text-highlight-bg, rgba(255, 208, 0, 0.25)); color: var(--text-normal); border-radius: 3px; padding: 0 0.12em; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.inline-reminders-highlight.is-overdue { background-color: rgba(224, 60, 60, 0.16); color: var(--text-error, #d33); }
 .inline-reminders-view { padding: var(--size-4-4); }
 .inline-reminders-header { display: flex; align-items: center; justify-content: space-between; gap: var(--size-4-2); }
 .inline-reminders-header h2 { margin: 0; font-size: var(--font-ui-large); }
@@ -10,8 +11,9 @@
 .inline-reminders-title:hover { color: var(--text-accent); }
 .inline-reminders-path { grid-column: 1 / -1; color: var(--text-faint); overflow-wrap: anywhere; font-size: var(--font-ui-smaller); }
 .inline-reminders-time { align-self: center; color: var(--text-muted); font-size: var(--font-ui-small); }
-.inline-reminders-card.is-overdue { border-left: 3px solid var(--text-warning); }
-.inline-reminders-card.is-overdue .inline-reminders-time { color: var(--text-warning); }
+.inline-reminders-card.is-overdue { border-left: 3px solid var(--text-error); }
+.inline-reminders-card.is-overdue .inline-reminders-time,
+.inline-reminders-card.is-overdue .inline-reminders-title { color: var(--text-error); }
 .inline-reminders-dismiss { font-size: var(--font-ui-smaller); }
 .inline-reminders-error { color: var(--text-error); }
 .inline-reminders-suggestion-title { font-weight: var(--font-medium); }

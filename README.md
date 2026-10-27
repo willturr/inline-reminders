@@ -47,7 +47,7 @@ You can also write timestamps directly:
 
 `T` may replace the space; seconds are optional. Invalid dates and daylight-saving gaps are ignored. Local timestamps in a repeated autumn hour choose its earlier occurrence. Use an explicit offset for precision; run **Rescan reminders** after changing timezone if using offset-free timestamps.
 
-The rest of the line becomes the reminder message, or the note name if empty. Markers highlight in editing and reading views, even before a valid date is entered. Checked tasks, frontmatter, fenced/inline code, and HTML comments are ignored by the scheduler.
+The rest of the line becomes the reminder message, or the note name if empty. Markers highlight in editing and reading views, even before a valid date is entered. **Overdue reminders turn red** in notes and the sidebar, refreshing automatically. Checked tasks keep their normal styling; they, frontmatter, fenced/inline code, and HTML comments are ignored by the scheduler.
 
 ## View and manage
 
